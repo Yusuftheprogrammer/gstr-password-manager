@@ -1,0 +1,13 @@
+{
+  "name": "frontend",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.4.0"
+  }
+}
