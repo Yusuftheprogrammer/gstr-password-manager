@@ -1,4 +1,3 @@
-
 function getMaterialKey(password: string) {
   const enc = new TextEncoder();
   return crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, [
@@ -13,9 +12,10 @@ export async function encrypt(
   salt: Uint8Array,
   iv: Uint8Array,
 ) {
-  const bytes = typeof plaintext === "string"
-    ? new TextEncoder().encode(plaintext)
-    : plaintext;
+  const bytes =
+    typeof plaintext === "string"
+      ? new TextEncoder().encode(plaintext)
+      : plaintext;
 
   const materialKey = await getMaterialKey(password);
   const key = await crypto.subtle.deriveKey(
@@ -39,7 +39,7 @@ export async function encrypt(
 }
 
 export async function decrypt(
-  ciphertext: Uint8Array,
+  ciphertext: ArrayBuffer,
   password: string,
   salt: Uint8Array,
   iv: Uint8Array,
@@ -71,4 +71,27 @@ export function getRandomSalt(): Uint8Array {
 
 export function getRandomIv(): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(12));
+}
+
+export function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+export async function deriveAuthHash(password: string, salt: Uint8Array) {
+  const materialKey = await getMaterialKey(password);
+  return crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt: salt as BufferSource,
+      iterations: 600000,
+      hash: "SHA-256",
+    },
+    materialKey,
+    256
+  );
 }
