@@ -33,7 +33,7 @@ export class AuthService {
       name: dto.name,
       email: dto.email,
       authHash,
-      authSalt: Buffer.from(dto.encryptionSalt, 'base64'),
+      authSalt: Buffer.from(dto.authSalt, 'base64'),
       encryptionSalt: Buffer.from(dto.encryptionSalt, 'base64'),
     });
 

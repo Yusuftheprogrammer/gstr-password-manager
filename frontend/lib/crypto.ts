@@ -82,6 +82,15 @@ export function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
   return btoa(binary);
 }
 
+export function base64ToBuffer(base64: string) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export async function deriveAuthHash(password: string, salt: Uint8Array) {
   const materialKey = await getMaterialKey(password);
   return crypto.subtle.deriveBits(
@@ -92,6 +101,22 @@ export async function deriveAuthHash(password: string, salt: Uint8Array) {
       hash: "SHA-256",
     },
     materialKey,
-    256
+    256,
+  );
+}
+
+export async function deriveEncryptionKey(password: string, salt: Uint8Array) {
+  const materialKey = await getMaterialKey(password);
+  return crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: salt as BufferSource,
+      iterations: 600000,
+      hash: "SHA-256",
+    },
+    materialKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt", "encrypt"],
   );
 }

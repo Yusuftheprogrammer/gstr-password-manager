@@ -1,48 +1,33 @@
 "use client";
-
-import { apiGetSalt, apiLogin } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
-import {
-  base64ToBuffer,
-  bufferToBase64,
-  deriveAuthHash,
-  deriveEncryptionKey,
-} from "@/lib/crypto";
+import { apiRegister } from "@/lib/api";
+import { getRandomSalt, deriveAuthHash, bufferToBase64 } from "@/lib/crypto";
 import { useState } from "react";
 
-export default function LoginPage() {
+export default function Register() {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
-  const setEncryptionKey = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      setStatus("Logging in...");
-
-      const { authSalt: authSaltBase64 } = await apiGetSalt(email);
-      const authSalt = base64ToBuffer(authSaltBase64);
+      const authSalt = getRandomSalt();
+      const encryptionSalt = getRandomSalt();
 
       const authHashBuffer = await deriveAuthHash(password, authSalt);
       const authHash = bufferToBase64(authHashBuffer);
 
-      console.log("authHash at login:", authHash);
-
-      const res = await apiLogin({
+      await apiRegister({
+        name,
         email,
         authHash,
+        authSalt: bufferToBase64(authSalt),
+        encryptionSalt: bufferToBase64(encryptionSalt),
       });
 
-      localStorage.setItem("token", res.accessToken);
-
-      const encryptionSalt = base64ToBuffer(res.encryptionSalt);
-
-      const encryptionKey = await deriveEncryptionKey(password, encryptionSalt);
-      setEncryptionKey.setEncryptionKey(encryptionKey);
-
-      setStatus("Logged in successfully!");
+      setStatus("Registered successfully! You can now log in.");
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Something went wrong");
     }
@@ -50,6 +35,13 @@ export default function LoginPage() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <br />
       <input
         type="email"
         placeholder="Email"
@@ -64,7 +56,7 @@ export default function LoginPage() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <br />
-      <button type="submit">Login</button>
+      <button type="submit">Register</button>
       <p>{status}</p>
     </form>
   );
