@@ -1,3 +1,5 @@
+import { CipherKey } from "node:crypto";
+
 function getMaterialKey(password: string) {
   const enc = new TextEncoder();
   return crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, [
@@ -63,6 +65,27 @@ export async function decrypt(
     key,
     ciphertext as BufferSource,
   );
+}
+
+export async function decryptWithKey(
+  ciphertext: ArrayBuffer,
+  key: CryptoKey,
+  iv: Uint8Array,
+) {
+  return crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: iv as BufferSource },
+    key,
+    ciphertext
+  )
+}
+
+export async function encryptWithKey(
+  plaintext: Uint8Array | string,
+  key: CryptoKey,
+  iv: Uint8Array,
+) {
+  const bytes = typeof plaintext === "string" ? new TextEncoder().encode(plaintext) : plaintext;
+  return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv as BufferSource }, key, bytes as BufferSource);
 }
 
 export function getRandomSalt(): Uint8Array {

@@ -8,6 +8,7 @@ import {
   deriveAuthHash,
   deriveEncryptionKey,
 } from "@/lib/crypto";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
   const setEncryptionKey = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ export default function LoginPage() {
         authHash,
       });
 
-      localStorage.setItem("token", res.accessToken);
+      localStorage.setItem("accessToken", res.accessToken);
 
       const encryptionSalt = base64ToBuffer(res.encryptionSalt);
 
@@ -43,6 +45,8 @@ export default function LoginPage() {
       setEncryptionKey.setEncryptionKey(encryptionKey);
 
       setStatus("Logged in successfully!");
+
+      router.push("/vault");
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Something went wrong");
     }

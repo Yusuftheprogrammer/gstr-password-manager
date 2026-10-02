@@ -53,3 +53,37 @@ export async function apiLogin(data: {
 
   return res.json();
 }
+
+export function getToken() {
+  return localStorage.getItem("accessToken");
+}
+
+export async function apiGetVault(): Promise<{
+  id: string;
+  ciphertext: string;
+  iv: string;
+  }[]> {
+  const res = await fetch(`${API_URL}/vault`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch vault");
+  return res.json();
+}
+
+export async function apiPostEntry(data: { ciphertext: string; iv: string }) {
+  const res = await fetch(`${API_URL}/vault`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create entry");
+  return res.json();
+}
+
+
