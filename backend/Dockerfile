@@ -6,6 +6,9 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 
+ARG FRONTEND_URL
+ENV FRONTEND_URL=$FRONTEND_URL
+
 RUN bun run build
 
 EXPOSE 3000
