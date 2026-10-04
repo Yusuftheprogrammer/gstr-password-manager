@@ -58,11 +58,13 @@ export function getToken() {
   return localStorage.getItem("accessToken");
 }
 
-export async function apiGetVault(): Promise<{
-  id: string;
-  ciphertext: string;
-  iv: string;
-  }[]> {
+export async function apiGetVault(): Promise<
+  {
+    id: string;
+    ciphertext: string;
+    iv: string;
+  }[]
+> {
   const res = await fetch(`${API_URL}/vault`, {
     headers: {
       Authorization: `Bearer ${getToken()}`,
@@ -86,4 +88,30 @@ export async function apiPostEntry(data: { ciphertext: string; iv: string }) {
   return res.json();
 }
 
+export async function apiUpdateEntry(
+  id: string,
+  body: { ciphertext: string; iv: string },
+) {
+  const res = await fetch(`${API_URL}/vault/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(body),
+  });
 
+  if (!res.ok) throw new Error("Failed to update entry");
+  return res.json();
+}
+
+export async function apiDeleteEntry(id: string) {
+  const res = await fetch(`${API_URL}/vault/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to delete entry");
+  return res.json();
+}

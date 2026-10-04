@@ -1,11 +1,13 @@
+import Hero from "@/components/Hero";
+import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
 
-export default function Home() {
- 
+export default function Page() {
   return (
-    <Link href="/login" className="rounded bg-blue-600 px-4 py-2 text-white">
-      Go to Login
-    </Link>
-  );
+    <div>
+      <Navbar />
+      <Hero /> 
+    </div>
+  )
 }

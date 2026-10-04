@@ -1,4 +1,3 @@
-import { CipherKey } from "node:crypto";
 
 function getMaterialKey(password: string) {
   const enc = new TextEncoder();
@@ -75,8 +74,8 @@ export async function decryptWithKey(
   return crypto.subtle.decrypt(
     { name: "AES-GCM", iv: iv as BufferSource },
     key,
-    ciphertext
-  )
+    ciphertext,
+  );
 }
 
 export async function encryptWithKey(
@@ -84,8 +83,15 @@ export async function encryptWithKey(
   key: CryptoKey,
   iv: Uint8Array,
 ) {
-  const bytes = typeof plaintext === "string" ? new TextEncoder().encode(plaintext) : plaintext;
-  return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv as BufferSource }, key, bytes as BufferSource);
+  const bytes =
+    typeof plaintext === "string"
+      ? new TextEncoder().encode(plaintext)
+      : plaintext;
+  return crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv as BufferSource },
+    key,
+    bytes as BufferSource,
+  );
 }
 
 export function getRandomSalt(): Uint8Array {
@@ -142,4 +148,25 @@ export async function deriveEncryptionKey(password: string, salt: Uint8Array) {
     false,
     ["decrypt", "encrypt"],
   );
+}
+
+export function generatePassword(
+  length = 16,
+  options = { symbols: true, numbers: true },
+) {
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const upper = lower.toUpperCase();
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+
+  let charset = lower + upper;
+  if (options.numbers) charset += numbers;
+  if (options.symbols) charset += symbols;
+
+  const randomValues = crypto.getRandomValues(new Uint32Array(length));
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    password += charset[randomValues[i] % charset.length];
+  }
+  return password;
 }
